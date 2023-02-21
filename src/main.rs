@@ -2,6 +2,21 @@ use clap::{Args, Parser, Subcommand};
 
 mod cmd;
 
+mod util {
+    pub mod system;
+    pub mod files;
+}
+mod constants;
+mod results;
+
+use serde;
+
+use std::io::Write;
+use env_logger::Builder;
+use log::LevelFilter;
+use std::env;
+
+
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 #[command(propagate_version = true)]
@@ -110,8 +125,24 @@ struct PullModel {
 struct PullClient {
 }
 
+fn enable_logging() {
+    let mut builder = Builder::new();
+    // builder.format_timestamp(None).format_module_path(false);
+    builder.format_timestamp(None);
+    builder.format(|buf, record| {
+        writeln!(buf, "{} [{}] {}", buf.timestamp(), record.level(), record.args())
+    });
+    if let Ok(level) = env::var("EDGEOPS_LOG_LEVEL") {
+        builder.filter_level(level.parse().unwrap_or(LevelFilter::Info));
+    } else {
+        builder.filter_level(LevelFilter::Info);
+    }
+    builder.init();
+}
 
 fn main() {
+    enable_logging();
+
     let cli = Cli::parse();
 
     match &cli.command {
