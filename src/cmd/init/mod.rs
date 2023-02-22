@@ -3,8 +3,8 @@ use std::io::Write;
 use std::process;
 
 use log::{info, debug, error};
-use serde::Deserialize;
-use serde::Serialize;
+
+use crate::model::config::Config;
 
 use crate::util::system;
 use crate::util::files;
@@ -12,34 +12,8 @@ use crate::constants;
 
 use crate::results::FileCreateResult;
 
-#[derive(Debug, Deserialize, Serialize)]
-struct Model {
-    host: String,
-    username: String,
-    password: String,
-    repository: String,
-}
-
-impl Default for Model {
-    fn default () -> Model {
-        Model{host: "".to_owned(), username: "".to_owned(), password: "".to_owned(), repository: "".to_owned()}
-    }
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-struct Config {
-    fleet_id: String,
-    model: Model,
-}
-
-impl Default for Config {
-    fn default () -> Config {
-        Config{fleet_id: "".to_owned(), model: Model::default()}
-    }
-}
-
 pub fn initialize(id: Option<String>, model_host: Option<String>, model_username: Option<String>, model_passwd: Option<String>, model_repo: Option<String>) {
-    let mut config: Config = read_config();
+    let mut config: Config::Config = read_config();
     if config.fleet_id == "" {
         config = prompt_config_values(config, id, model_host, model_username, model_passwd, model_repo);
         create_config(config);
@@ -48,7 +22,7 @@ pub fn initialize(id: Option<String>, model_host: Option<String>, model_username
     }
 }
 
-fn read_config() -> Config {
+fn read_config() -> Config::Config {
     debug!("Reading config file...");
 
     let home_dir = system::get_home_dir();
@@ -56,15 +30,15 @@ fn read_config() -> Config {
     let config_file_path = &format!("{}/{}", edge_home, constants::CONFIG_FILE);
     
     if files::file_exists(config_file_path) {
-        let config: Config = files::read_json(config_file_path).unwrap();
+        let config: Config::Config = files::read_json(config_file_path).unwrap();
         config
     } else {
         Config::default()
     }
 }
 
-fn prompt_config_values(mut config: Config, id: Option<String>, model_host: Option<String>, model_username: Option<String>, 
-                        model_passwd: Option<String>, model_repo: Option<String>) -> Config {
+fn prompt_config_values(mut config: Config::Config, id: Option<String>, model_host: Option<String>, model_username: Option<String>, 
+                        model_passwd: Option<String>, model_repo: Option<String>) -> Config::Config {
     match id {
         Some(x) => {config.fleet_id = x},
         None    => {
@@ -113,7 +87,7 @@ fn prompt_config_values(mut config: Config, id: Option<String>, model_host: Opti
     return config;
 }
 
-fn create_config(config: Config) {
+fn create_config(config: Config::Config) {
     debug!("Creating config file...");
 
     let home_dir = system::get_home_dir();
@@ -124,7 +98,7 @@ fn create_config(config: Config) {
     create_config_file(config_file_path, config);
 }
 
-fn create_config_file(config_file_path: &str, config: Config) {
+fn create_config_file(config_file_path: &str, config: Config::Config) {
     debug!("Creating config file...");
     files::write_to_json(&config, config_file_path).unwrap();
     debug!("Config file created");

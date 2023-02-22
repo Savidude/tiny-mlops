@@ -2,14 +2,16 @@ use clap::{Args, Parser, Subcommand};
 
 mod cmd;
 
+mod model {
+    pub mod image;
+    pub mod config;
+}
 mod util {
     pub mod system;
     pub mod files;
 }
 mod constants;
 mod results;
-
-use serde;
 
 use std::io::Write;
 use env_logger::Builder;
