@@ -9,6 +9,7 @@ mod model {
 mod util {
     pub mod system;
     pub mod files;
+    pub mod docker;
 }
 mod constants;
 mod results;

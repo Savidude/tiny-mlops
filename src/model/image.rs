@@ -11,6 +11,6 @@ pub mod Image {
     }
 
     pub fn default () -> Image {
-        Image{host: "https://registry.hub.docker.com/v2".to_owned(), username: "".to_owned(), password: "".to_owned(), repository: "".to_owned()}
+        Image{host: "registry.hub.docker.com".to_owned(), username: "".to_owned(), password: "".to_owned(), repository: "".to_owned()}
     }
 }

@@ -6,6 +6,7 @@ use log::{info, debug, error};
 
 use crate::model::config::Config;
 
+use crate::util::docker;
 use crate::util::system;
 use crate::util::files;
 use crate::constants;
@@ -16,9 +17,15 @@ pub fn initialize(id: Option<String>, model_host: Option<String>, model_username
     let mut config: Config::Config = read_config();
     if config.fleet_id == "" {
         config = prompt_config_values(config, id, model_host, model_username, model_passwd, model_repo);
-        create_config(config);
+        create_config(&config);
+        info!("Pulling model image");
+        docker::pull::pull_image(&config.model);
+        info!("Starting model image...");
+        docker::run::run_image(&config.model);
+        info!("The model is running...");
     } else {
-        info!("Device is already initialized")
+        info!("Device is already initialized");
+        // docker::run::run_image();
     }
 }
 
@@ -51,7 +58,7 @@ fn prompt_config_values(mut config: Config::Config, id: Option<String>, model_ho
     match model_host {
         Some(x) => {config.model.host = x},
         None    => {
-            print!("Model registry host (https://registry.hub.docker.com/v2): ");
+            print!("Model registry host (registry.hub.docker.com): ");
             io::stdout().flush().unwrap();
             io::stdin().read_line(&mut config.model.host).expect("Didn't Receive Input");
             config.model.host = config.model.host.trim_end().to_owned()
@@ -87,7 +94,7 @@ fn prompt_config_values(mut config: Config::Config, id: Option<String>, model_ho
     return config;
 }
 
-fn create_config(config: Config::Config) {
+fn create_config(config: &Config::Config) {
     debug!("Creating config file...");
 
     let home_dir = system::get_home_dir();
@@ -98,7 +105,7 @@ fn create_config(config: Config::Config) {
     create_config_file(config_file_path, config);
 }
 
-fn create_config_file(config_file_path: &str, config: Config::Config) {
+fn create_config_file(config_file_path: &str, config: &Config::Config) {
     debug!("Creating config file...");
     files::write_to_json(&config, config_file_path).unwrap();
     debug!("Config file created");
