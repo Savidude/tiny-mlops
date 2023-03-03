@@ -9,6 +9,7 @@ use crate::model::image::image;
 
 use crate::util::docker;
 use crate::util::system;
+use crate::util::mqtt;
 use crate::util::files;
 use crate::constants;
 
@@ -19,7 +20,8 @@ pub fn initialize(id: Option<String>, model_host: Option<String>, model_username
     if config.fleet_id == "" {
         config = prompt_config_values(config, id, model_host, model_username, model_passwd, model_repo);
         create_config(&config);
-        start_mqtt_broker();
+        // start_mqtt_broker();
+        mqtt::broker::start_mqtt_broker();
         start_model(&config.model);
     } else {
         info!("Device is already initialized");
@@ -28,9 +30,7 @@ pub fn initialize(id: Option<String>, model_host: Option<String>, model_username
 
 fn read_config() -> Config::Config {
     debug!("Reading config file...");
-
-    let home_dir = system::get_home_dir();
-    let edge_home = &format!("{}/{}", home_dir, constants::EDGE_HOME_DIR);
+    let edge_home = system::get_edge_home_dir();
     let config_file_path = &format!("{}/{}", edge_home, constants::CONFIG_FILE);
     
     if files::file_exists(config_file_path) {
@@ -93,10 +93,8 @@ fn prompt_config_values(mut config: Config::Config, id: Option<String>, model_ho
 
 fn create_config(config: &Config::Config) {
     debug!("Creating config file...");
-
-    let home_dir = system::get_home_dir();
-    let edge_home = &format!("{}/{}", home_dir, constants::EDGE_HOME_DIR);
-    create_home_dir(edge_home);
+    let edge_home = system::get_edge_home_dir();
+    create_home_dir(&edge_home);
     
     let config_file_path = &format!("{}/{}", edge_home, constants::CONFIG_FILE);
     create_config_file(config_file_path, config);
@@ -121,19 +119,6 @@ fn create_home_dir(dir_path: &str){
             process::exit(constants::EXIT_CODE_SYSTEM_ERR);
         },
     }
-}
-
-fn start_mqtt_broker() {
-    info!("Pulling MQTT boker...");
-    let broker_image = image::Image { host: "registry.hub.docker.com".to_string(), username: "".to_string(), 
-                                                password: "".to_string(), repository: "eclipse-mosquitto:latest".to_string() };
-    docker::pull::pull_image(&broker_image);
-
-    info!("Starting MQTT boker...");
-    let expose_arg = image::ArgExpose { srcport:1883, protocol:"tcp".to_string(), hostport:1883};
-    let volumes = "/Users/savidu.dias/projects/university/thesis/edgeops/mosquitto-no-auth.conf:/mosquitto/config/mosquitto.conf";
-    let image_args = image::ImageArgs { expose: Some(expose_arg), volumes: Some(volumes.to_string())};
-    docker::run::run_image_with_args(&broker_image, &image_args);
 }
 
 fn start_model(image: &image::Image) {

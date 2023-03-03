@@ -1,6 +1,7 @@
 use std::env;
+use crate::constants;
 
-pub fn get_home_dir() -> String {
+fn get_home_dir() -> String {
     match env::var("HOME") {
         Ok(home) => return home,
         Err(_) => {
@@ -8,4 +9,10 @@ pub fn get_home_dir() -> String {
             return String::from("");
         },
     }
+}
+
+pub fn get_edge_home_dir() -> String {
+    let home_dir = get_home_dir();
+    let edge_home = &format!("{}/{}", home_dir, constants::EDGE_HOME_DIR);
+    return edge_home.to_string()
 }

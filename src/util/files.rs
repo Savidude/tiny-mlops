@@ -3,11 +3,23 @@ use std::path::Path;
 use std::fs::File;
 use std::io::BufReader;
 use std::io::Write;
+use std::io::copy;
 
 use serde::de::DeserializeOwned;
 use serde::{Serialize};
 
+use reqwest;
+
 use crate::results::FileCreateResult;
+
+#[tokio::main]
+pub async fn download_from_url(url: &str, destination: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let response = reqwest::get(url).await?;
+    let bytes = response.bytes().await?;
+    let mut file = File::create(destination)?;
+    copy(&mut bytes.as_ref(), &mut file)?;
+    Ok(())
+}
 
 pub fn create_dir_if_exists(filepath: &str)  -> FileCreateResult<> {
     if Path::new(filepath).is_dir() {
