@@ -2,10 +2,10 @@ use shiplift::{Docker, PullOptions, RegistryAuth};
 use futures::StreamExt;
 use tokio;
 
-use crate::model::image::Image;
+use crate::model::image::image;
 
 #[tokio::main]
-pub async fn pull_image(image: &Image::Image) {
+pub async fn pull_image(image: &image::Image) {
     let docker = Docker::new();
     let auth = RegistryAuth::builder()
         .username(&image.username)

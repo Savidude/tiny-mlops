@@ -10,6 +10,7 @@ mod util {
     pub mod system;
     pub mod files;
     pub mod docker;
+    pub mod mqtt;
 }
 mod constants;
 mod results;

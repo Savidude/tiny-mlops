@@ -1,4 +1,4 @@
-pub mod Image {
+pub mod image {
     use serde::Deserialize;
     use serde::Serialize;
 
@@ -12,5 +12,16 @@ pub mod Image {
 
     pub fn default () -> Image {
         Image{host: "registry.hub.docker.com".to_owned(), username: "".to_owned(), password: "".to_owned(), repository: "".to_owned()}
+    }
+
+    pub struct ArgExpose {
+        pub srcport: u32,
+        pub protocol: String,
+        pub hostport: u32,
+    }
+
+    pub struct ImageArgs {
+        pub expose: Option<ArgExpose>,
+        pub volumes: Option<String>,
     }
 }

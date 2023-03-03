@@ -5,6 +5,7 @@ use std::process;
 use log::{info, debug, error};
 
 use crate::model::config::Config;
+use crate::model::image::image;
 
 use crate::util::docker;
 use crate::util::system;
@@ -18,14 +19,10 @@ pub fn initialize(id: Option<String>, model_host: Option<String>, model_username
     if config.fleet_id == "" {
         config = prompt_config_values(config, id, model_host, model_username, model_passwd, model_repo);
         create_config(&config);
-        info!("Pulling model image");
-        docker::pull::pull_image(&config.model);
-        info!("Starting model image...");
-        docker::run::run_image(&config.model);
-        info!("The model is running...");
+        start_mqtt_broker();
+        start_model(&config.model);
     } else {
         info!("Device is already initialized");
-        // docker::run::run_image();
     }
 }
 
@@ -124,4 +121,25 @@ fn create_home_dir(dir_path: &str){
             process::exit(constants::EXIT_CODE_SYSTEM_ERR);
         },
     }
+}
+
+fn start_mqtt_broker() {
+    info!("Pulling MQTT boker...");
+    let broker_image = image::Image { host: "registry.hub.docker.com".to_string(), username: "".to_string(), 
+                                                password: "".to_string(), repository: "eclipse-mosquitto:latest".to_string() };
+    docker::pull::pull_image(&broker_image);
+
+    info!("Starting MQTT boker...");
+    let expose_arg = image::ArgExpose { srcport:1883, protocol:"tcp".to_string(), hostport:1883};
+    let volumes = "/Users/savidu.dias/projects/university/thesis/edgeops/mosquitto-no-auth.conf:/mosquitto/config/mosquitto.conf";
+    let image_args = image::ImageArgs { expose: Some(expose_arg), volumes: Some(volumes.to_string())};
+    docker::run::run_image_with_args(&broker_image, &image_args);
+}
+
+fn start_model(image: &image::Image) {
+    info!("Pulling model image");
+    docker::pull::pull_image(image);
+    info!("Starting model image...");
+    docker::run::run_image(image);
+    info!("The model is running...");
 }
