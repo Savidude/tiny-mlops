@@ -8,4 +8,4 @@ pub const MQTT_BROKER_CONFIG_PATH: &'static str = "/mosquitto/config/mosquitto.c
 pub const MQTT_BROKER_CONF_FILE: &'static str = "mosquitto-no-auth.conf";
 
 pub const DOCKERHUB_URL: &'static str = "registry.hub.docker.com";
-pub const GITHUB_PROJECT_URL: &'static str = "https://github.com/Savidude/tiny-mlops/";
+pub const GITHUB_RAW_CONTENT_PROJECT_URL: &'static str = "https://github.com/Savidude/tiny-mlops/";

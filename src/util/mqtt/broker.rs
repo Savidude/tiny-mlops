@@ -9,7 +9,8 @@ use crate::util::files;
 
 fn get_mosquitto_conf(mqtt_config_file: &str) {
     let version: &str = env!("CARGO_PKG_VERSION");
-    let conf_url: String = format!("{}/releases/download/v{}/{}", constants::GITHUB_PROJECT_URL, version, constants::MQTT_BROKER_CONF_FILE);
+    let conf_url: String = format!("{}/v{}/{}", constants::GITHUB_RAW_CONTENT_PROJECT_URL, version, constants::MQTT_BROKER_CONF_FILE);
+    print!("{}", conf_url);
     if let Err(e) = files::download_from_url(&conf_url, &mqtt_config_file) {
         error!("Error while downloading file {}", e);
     }
