@@ -23,5 +23,6 @@ pub mod image {
     pub struct ImageArgs {
         pub expose: Option<ArgExpose>,
         pub volumes: Option<String>,
+        pub add_host: Option<String>,
     }
 }

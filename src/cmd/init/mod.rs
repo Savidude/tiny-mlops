@@ -20,7 +20,6 @@ pub fn initialize(id: Option<String>, model_host: Option<String>, model_username
     if config.fleet_id == "" {
         config = prompt_config_values(config, id, model_host, model_username, model_passwd, model_repo);
         create_config(&config);
-        // start_mqtt_broker();
         mqtt::broker::start_mqtt_broker();
         start_model(&config.model);
     } else {
@@ -125,6 +124,7 @@ fn start_model(image: &image::Image) {
     info!("Pulling model image");
     docker::pull::pull_image(image);
     info!("Starting model image...");
-    docker::run::run_image(image);
+    let image_args = image::ImageArgs { expose: None, volumes: None, add_host: Some(constants::DOCKER_LOCALHOST.to_string()) };
+    docker::run::run_image_with_args(&image, &image_args);
     info!("The model is running...");
 }

@@ -10,7 +10,6 @@ use crate::util::files;
 fn get_mosquitto_conf(mqtt_config_file: &str) {
     let version: &str = env!("CARGO_PKG_VERSION");
     let conf_url: String = format!("{}/v{}/{}", constants::GITHUB_RAW_CONTENT_PROJECT_URL, version, constants::MQTT_BROKER_CONF_FILE);
-    print!("{}", conf_url);
     if let Err(e) = files::download_from_url(&conf_url, &mqtt_config_file) {
         error!("Error while downloading file {}", e);
     }
@@ -30,7 +29,7 @@ pub fn start_mqtt_broker() {
     info!("Starting MQTT boker...");
     let expose_arg = image::ArgExpose { srcport:1883, protocol:"tcp".to_string(), hostport:1883};
     let volumes = format!("{}:{}", config_file_download_path, constants::MQTT_BROKER_CONFIG_PATH);
-    let image_args = image::ImageArgs { expose: Some(expose_arg), volumes: Some(volumes.to_string())};
+    let image_args = image::ImageArgs { expose: Some(expose_arg), volumes: Some(volumes.to_string()), add_host:None };
     docker::run::run_image_with_args(&broker_image, &image_args);
 }
 
